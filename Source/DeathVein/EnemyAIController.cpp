@@ -55,10 +55,10 @@ void AEnemyAIController::Tick(float DeltaTime)
 		bIsPlayerDetected = false;
 	}
 
-	if (EnemyChar->NextWaypoint != nullptr && bIsPlayerDetected == false)
+	/*if (EnemyChar->NextWaypoint != nullptr && bIsPlayerDetected == false)
 	{
 		MoveToActor(EnemyChar->NextWaypoint, 5.0f);
-	}
+	}*/
 }
 
 void AEnemyAIController::OnPossess(APawn * Pawn)

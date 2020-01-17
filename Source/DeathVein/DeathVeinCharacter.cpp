@@ -13,6 +13,10 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Blueprint/UserWidget.h"
+#include "StormProjectile.h"
+#include "MagicAbility.h"
+#include "UltimateAbility.h"
+#include "MagicDecal.h"
 #include "Engine.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -32,6 +36,8 @@ bool isAttacking1 = false;
 bool isAttacking2 = false;
 bool isAttacking3 = false;
 bool isAttacking4 = false;
+
+AMagicDecal* newDecal;
 
 ADeathVeinCharacter::ADeathVeinCharacter()
 {
@@ -103,19 +109,6 @@ ADeathVeinCharacter::ADeathVeinCharacter()
 
 	//------------------------------------PARTICLE SYSTEMS--------------------------------------------
 
-	/*Ability1 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("PSC1"));
-	Ability1->SetupAttachment(RootComponent);
-	Ability1->bAutoActivate = false;
-
-	Ability2 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("PSC2"));
-	Ability2->SetupAttachment(RootComponent);
-	Ability2->bAutoActivate = false;
-
-	Ability3 = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("PSC3"));
-	Ability3->SetupAttachment(RootComponent);
-	Ability3->bAutoActivate = false;*/
-
-	//DecalMaterial = CreateDefaultSubobject<UMaterialInterface>(TEXT("AOE Spell Radius"));
 
 	//------------------------------------------------------------------------------------------------
 }
@@ -125,21 +118,39 @@ void ADeathVeinCharacter::CoolDownDelay()
 	if(CoolDown <= 7.f) {
 		CoolDown += 1.f;
 	}
-}
-
-void ADeathVeinCharacter::CoolDownDelay1()
-{
-	if(CoolDown1 <= 5.f) {
+	if (CoolDown1 <= 5.f) {
 		CoolDown1 += 1.f;
 	}
-}
-
-void ADeathVeinCharacter::CoolDownDelay2()
-{
-	if(CoolDown2 <= 30.f) {
+	if (CoolDown2 <= 30.f) {
 		CoolDown2 += 1.f;
 	}
 }
+
+//void ADeathVeinCharacter::MagicCircleSpawn()
+//{
+//	//Using Magic Circle
+//	APlayerController* PlayerCont = (APlayerController*)UGameplayStatics::GetPlayerController(this, 0);
+//
+//	MagicCircleMeshComp->SetHiddenInGame(false);
+//
+//	FHitResult hitResult;
+//	bool ishit = PlayerCont->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Visibility), true, hitResult);
+//	if (ishit) {
+//		hitResult.Location.Z = GetActorLocation().Z;
+//		MagicCircleMeshComp->SetWorldLocation(hitResult.Location);
+//		//MagicCircleMeshComp->SetRelativeLocation(hitResult.Location);
+//	}
+//}
+
+//void ADeathVeinCharacter::CoolDownDelay1()
+//{
+//	
+//}
+//
+//void ADeathVeinCharacter::CoolDownDelay2()
+//{
+//	
+//}
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -349,6 +360,13 @@ void ADeathVeinCharacter::PrimaryAttack()
 			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("NOT ENOUGH MANA")));
 		}
 	}
+
+	if (isUsingAbility1 && isAttacking) {
+		newDecal->MagicAbilityUse();
+	}
+	else if (isUsingAbility2 && isAttacking) {
+		newDecal->MagicAbilityUse1();
+	}
 }
 
 void ADeathVeinCharacter::StopPrimaryAttack()
@@ -383,8 +401,7 @@ void ADeathVeinCharacter::PrimaryAbility()
 			FActorSpawnParameters SpawnParams;
 
 			GetWorld()->SpawnActor(StormProjectile, &loc, &rot, SpawnParams);
-
-			Damage = .35f;
+		
 		}
 		else {
 			if (GEngine) {
@@ -405,26 +422,26 @@ void ADeathVeinCharacter::PrimaryAbility()
 void ADeathVeinCharacter::SecondaryAbility()
 {
 	//GROUND SPIKE
-	
-	isUsingAbility1 = true;
 
 	if (CoolDown1 >= 5.f)
 	{
-		if (CurrentMana >= ManaCost1 && isUsingAbility1)
+		isUsingAbility1 = true;
+
+		if (CurrentMana >= ManaCost1)
 		{
 			CurrentMana -= ManaCost1;
 
 			PlayAnimMontage(Ability2Anim, AnimPlayTime, NAME_None);
 
 			FVector loc = GetActorLocation();
-
+		
 			FRotator rot = GetActorRotation();
 
 			FActorSpawnParameters SpawnParams;
+			
+			AActor* myActor = GetWorld()->SpawnActor(MagicDecal, &loc, &rot, SpawnParams);
 
-			GetWorld()->SpawnActor(MagicAbility, &loc, &rot, SpawnParams);
-
-			Damage = .5f;
+			newDecal = (AMagicDecal*)myActor;
 
 		}
 		else {
@@ -435,13 +452,14 @@ void ADeathVeinCharacter::SecondaryAbility()
 
 		CoolDown1 = 0.f;
 		
-		GetWorld()->GetTimerManager().SetTimer(CoolDownHandler, this, &ADeathVeinCharacter::CoolDownDelay1, 1.f, true);
+		GetWorld()->GetTimerManager().SetTimer(CoolDownHandler1, this, &ADeathVeinCharacter::CoolDownDelay, 1.f, true);
 	}
 	else if (CoolDown1 <= 4.9f) {
 		ManaCost = 0;
 		if (GEngine) {
 			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("Ability On CoolDown")));
 		}
+		isUsingAbility1 = false;
 	}
 }
 void ADeathVeinCharacter::ThirdAbility()
@@ -456,25 +474,26 @@ void ADeathVeinCharacter::FourthAbility()
 {
 	//METEOR STRIKE
 	
-	isUsingAbility2 = true;
-
 	if (CoolDown2 >= 30.f)
 	{
-		if (CurrentMana >= ManaCost2 && isUsingAbility2)
+		isUsingAbility2 = true;
+
+		if (CurrentMana >= ManaCost2)
 		{
 			CurrentMana -= ManaCost2;
 
 			PlayAnimMontage(Ability3Anim, AnimPlayTime, NAME_None);
 
 			FVector loc = GetActorLocation();
-
+		
 			FRotator rot = GetActorRotation();
 
 			FActorSpawnParameters SpawnParams;
+		
+			AActor* myActor = GetWorld()->SpawnActor(MagicDecal, &loc, &rot, SpawnParams);
 
-			GetWorld()->SpawnActor(MagicAbility, &loc, &rot, SpawnParams);
+			newDecal = (AMagicDecal*)myActor;
 
-			Damage = .7f;
 		}
 		else {
 			if (GEngine) {
@@ -484,13 +503,14 @@ void ADeathVeinCharacter::FourthAbility()
 
 		CoolDown2 = 0.f;
 
-		GetWorld()->GetTimerManager().SetTimer(CoolDownHandler, this, &ADeathVeinCharacter::CoolDownDelay2, 1.f, true);
+		GetWorld()->GetTimerManager().SetTimer(CoolDownHandler2, this, &ADeathVeinCharacter::CoolDownDelay, 1.f, true);
 	}
-	else if (CoolDown2 <= 4.9f) {
+	else if (CoolDown2 <= 29.9f) {
 		ManaCost = 0;
 		if (GEngine) {
 			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("Ability On CoolDown")));
 		}
+		isUsingAbility2 = false;
 	}
 }
 
@@ -517,7 +537,7 @@ void ADeathVeinCharacter::LockOn()
 
 	GetWorld()->LineTraceSingleByChannel(hitResult, Start, End, ECC_Visibility);
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Blue, false, 5.f, 5.f, 5.f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Blue, false, 5.f, 5.f, 5.f);
 
 	if (hitResult.bBlockingHit) {
 
@@ -528,8 +548,6 @@ void ADeathVeinCharacter::LockOn()
 		FRotator rotat = FMath::RInterpTo(GetControlRotation(), rott, GetWorld()->GetDeltaSeconds(), 6.f);
 		FRotator rot = FRotator(pitch, rotat.Yaw, roll);
 		GetController()->SetControlRotation(rot);
-
-		UE_LOG(LogTemp, Warning, TEXT("Something Was Hit"));
 	}
 }
 
@@ -643,13 +661,10 @@ int ADeathVeinCharacter::UpdateCoins(int CoinsGain)
 {
 	CurrentCoins += CoinsGain;
 	if (isLeveledUp) {
-		CurrentCoins += 100;
+		CurrentCoins += 10;
 	}
-	if (CurrentHp <= 0.f) {
-		CurrentCoins -= 20;
-		if (CurrentCoins <= 0) {
-			CurrentCoins = 0;
-		}
+	if (CurrentHp <= 0) {
+		CurrentCoins = 0;	
 	}
 
 	return CurrentCoins;
@@ -673,7 +688,9 @@ float ADeathVeinCharacter::UpdateHp(float HpTaken)
 		CurrentHp = MaxHp;
 	}
 	else if (CurrentHp <= 0) {
-		//Destroy();
+		
+		UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()), false);
+
 		UE_LOG(LogTemp, Warning, TEXT("No HP"));
 	}
 

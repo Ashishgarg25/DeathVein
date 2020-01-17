@@ -26,14 +26,23 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FTimerHandle CoolDownHandler;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FTimerHandle CoolDownHandler1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FTimerHandle CoolDownHandler2;
+
 	UFUNCTION()
 		void CoolDownDelay();
 
-	UFUNCTION()
+	/*UFUNCTION()
 		void CoolDownDelay1();
 
 	UFUNCTION()
-		void CoolDownDelay2();
+		void CoolDownDelay2();*/
+
+	/*UFUNCTION()
+		void MagicCircleSpawn();*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CoolDown")
 		float ManaCost;
@@ -131,7 +140,10 @@ public:
 		TSubclassOf<class AActor> StormProjectile;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
-		TSubclassOf<class AActor> MagicAbility;
+		TSubclassOf<class AActor> MagicDecal;
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
+		TSubclassOf<class AActor> UltimateAbility;*/
 
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
 		class UParticleSystem* Ability1Emitter;

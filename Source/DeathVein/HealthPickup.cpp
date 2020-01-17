@@ -39,7 +39,7 @@ void AHealthPickup::HealthGainFromInventory()
 
 	GameMode1 = (ADeathVeinGameMode*)GetWorld()->GetAuthGameMode();
 
-	for (int i = 0; i < 8; i++) {
+	/*for (int i = 0; i < 8; i++) {
 		int Item = GameMode1->InventoryItems[i];
 
 		if (Item == value) {
@@ -50,6 +50,27 @@ void AHealthPickup::HealthGainFromInventory()
 			Item = 0;
 			GameMode1->InventoryItems[i] = 0;
 			break;
+		}
+	}*/
+
+	if (Player1->isItemUsed1) {
+		int Item = GameMode1->InventoryItems[0];
+		if (Item == value) {
+			Player1->CurrentHp += HpGain;
+			if (Player1->CurrentHp >= 400.f) {
+				Player1->CurrentHp = 400.f;
+			}
+			GameMode1->InventoryItems[0] = 0;
+		}
+	}
+	else if (Player1->isItemUsed2) {
+		int Item = GameMode1->InventoryItems[1];
+		if (Item == value) {
+			Player1->CurrentHp += HpGain;
+			if (Player1->CurrentHp >= 400.f) {
+				Player1->CurrentHp = 400.f;
+			}
+			GameMode1->InventoryItems[1] = 0;
 		}
 	}
 }
@@ -78,7 +99,7 @@ void AHealthPickup::Tick(float DeltaTime)
 		if (Player1->isItemUsed1 || Player1->isItemUsed2)
 		{
 			HealthGainFromInventory();
-			Destroy();
+			//Destroy();
 		}
 	}
 }

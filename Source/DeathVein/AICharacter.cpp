@@ -77,6 +77,8 @@ float AAICharacter::UpdateHp(float HpTaken)
 
 		//PlayAnimMontage(Anim2, 1.f, NAME_None);
 
+		ActorName = this->GetName();
+
 		ADeathVeinCharacter* Player = (ADeathVeinCharacter*)UGameplayStatics::GetPlayerCharacter(this, 0);
 
 		Player->UpdateLvl(50);
@@ -89,7 +91,7 @@ float AAICharacter::UpdateHp(float HpTaken)
 
 		GetWorld()->SpawnActor(Coin, &loc, &rot, SpawnParams);
 
-		ActorName = this->GetName();
+		SetActorHiddenInGame(true);
 
 		if (KillFeedWidget != nullptr) {
 			CurrentKillFeedWidgetWidget = CreateWidget<UUserWidget>(GetWorld(), KillFeedWidget, NAME_None);
@@ -100,7 +102,7 @@ float AAICharacter::UpdateHp(float HpTaken)
 			CurrentKillFeedWidgetWidget->AddToViewport();
 		}
 
-		Destroy();
+		GetWorld()->GetTimerManager().SetTimer(DelayDeathHandler, this, &AAICharacter::DelayDeath, 3.f, false);
 	}
 
 	return CurrentHp;
@@ -136,7 +138,7 @@ void AAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	MaxHp = 100.f;
+	MaxHp = 150.f;
 	CurrentHp = MaxHp;
 
 	CurrentMana = 1.f;
@@ -169,45 +171,17 @@ void AAICharacter::DelayAttack()
 	PlayAnimMontage(Anim5, 1.f, NAME_None);
 }
 
+void AAICharacter::DelayDeath()
+{
+	CurrentKillFeedWidgetWidget->RemoveFromParent();
+	Destroy();
+}
+
 void AAICharacter::OnOverlap(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResults)
 {
 	if (OverlappedComp != NULL && OtherComp != NULL && OtherActor != this)
 	{
 		ADeathVeinCharacter* Player = (ADeathVeinCharacter*)UGameplayStatics::GetPlayerCharacter(this, 0);
-
-		/*if (OtherActor->ActorHasTag("MagicAbility"))
-		{
-			AMagicAbility* myActor = (AMagicAbility*)OtherActor;
-
-			if (myActor->isAbilityActive1)
-			{
-				Damage = 50.f;
-				UpdateHp(Damage);
-				UE_LOG(LogTemp, Warning, TEXT("Damage is %d"), Damage);
-
-				PlayAnimMontage(Anim3, 1.f, NAME_None);
-				UE_LOG(LogTemp, Warning, TEXT("Animation Working"));
-			}
-			else if (myActor->isAbilityActive2)
-			{
-				Damage = 70.f;
-				UpdateHp(Damage);
-				UE_LOG(LogTemp, Warning, TEXT("Damage is %d"), Damage);
-
-				PlayAnimMontage(Anim4, 1.f, NAME_None);
-
-				GetWorld()->GetTimerManager().SetTimer(DelayAttackHandler, this, &AAICharacter::DelayAttack, 1.f, false);
-			}
-		}*/
-
-		/*else if (OtherActor->ActorHasTag("StormAbility"))
-		{
-			Damage = 30.f;
-			UpdateHp(Damage);
-			UE_LOG(LogTemp, Warning, TEXT("STORM ABILITY ACTIVATED"));
-			PlayAnimMontage(Anim3, 1.f, NAME_None);
-			
-		}*/
 
 		if (OtherActor->ActorHasTag("MagicProjectile"))
 		{

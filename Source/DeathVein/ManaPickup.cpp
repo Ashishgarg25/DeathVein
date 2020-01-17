@@ -68,7 +68,7 @@ void AManaPickup::ManaGainFromInventory()
 
 	GameMode = (ADeathVeinGameMode*)GetWorld()->GetAuthGameMode();
 
-	for (int i = 0; i <= 7; i++) {
+	/*for (int i = 0; i <= 7; i++) {
 		int Item = GameMode->InventoryItems[i];
 
 		if (Item == value) {
@@ -76,9 +76,30 @@ void AManaPickup::ManaGainFromInventory()
 			if (Player->CurrentMana >= 600.f) {
 				Player->CurrentMana = 600.f;
 			}
-			Item = 0;
 			GameMode->InventoryItems[i] = 0;
+			UE_LOG(LogTemp, Warning, TEXT("INVENTORY item i is set to 0 "));
 			break;
+		}
+	}*/
+
+	if (Player->isItemUsed1) {
+		int Item = GameMode->InventoryItems[0];
+		if (Item == value) {
+			Player->CurrentMana += ManaGain;
+			if (Player->CurrentMana >= 600.f) {
+				Player->CurrentMana = 600.f;
+			}
+			GameMode->InventoryItems[0] = 0;
+		}
+	}
+	else if (Player->isItemUsed2) {
+		int Item = GameMode->InventoryItems[1];
+		if (Item == value) {
+			Player->CurrentMana += ManaGain;
+			if (Player->CurrentMana >= 600.f) {
+				Player->CurrentMana = 600.f;
+			}
+			GameMode->InventoryItems[1] = 0;
 		}
 	}
 }
@@ -107,7 +128,7 @@ void AManaPickup::Tick(float DeltaTime)
 		if (Player->isItemUsed1 || Player->isItemUsed2)
 		{
 			ManaGainFromInventory();
-			Destroy();
+			//Destroy();
 		}
 	}
 	

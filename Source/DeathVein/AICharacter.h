@@ -20,6 +20,11 @@ public:
 	UFUNCTION()
 		void DelayAttack();
 
+	FTimerHandle DelayDeathHandler;
+
+	UFUNCTION()
+		void DelayDeath();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation Montage")
 		class UAnimMontage* Anim1;
 

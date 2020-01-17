@@ -4,25 +4,34 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "MagicAbility.generated.h"
+#include "MagicDecal.generated.h"
 
 UCLASS()
-class DEATHVEIN_API AMagicAbility : public AActor
+class DEATHVEIN_API AMagicDecal : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AMagicAbility();
+	AMagicDecal();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MagicCircle")
+		class UStaticMeshComponent* MagicCircleMeshComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
-		class UBoxComponent* MagicBoxComp;
+		TSubclassOf<class AActor> MagicAbility;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VFX")
-		class UParticleSystemComponent* Ability2;
+		TSubclassOf<class AActor> UltimateAbility;
 
 	UFUNCTION()
-		void SpawnAbility();
+		void MagicCircleSpawn();
+
+	UFUNCTION()
+		void MagicAbilityUse();
+
+	UFUNCTION()
+		void MagicAbilityUse1();
 
 protected:
 	// Called when the game starts or when spawned
